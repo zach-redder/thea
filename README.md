@@ -15,25 +15,34 @@ steve-body is read-only and one-directional — it never issues commands, only d
 
 ## Tech stack
 
-- **React** + **TypeScript**
-- **Vite**
-- Component/styling approach to be decided when this repo is actually built — no framework lock-in yet beyond React/TS
+- **Next.js 15** (App Router) + **TypeScript**
+- **React 18**
+- Styling approach to be decided when this repo is actually built — no CSS framework lock-in yet
 
-## Planned structure
+## Structure
 
 ```
 steve-body/
-├── src/
-│   ├── pages/
-│   │   ├── MemoryBrowser.tsx     # steve.memories + identity/wardrobe/environment
-│   │   ├── Logs.tsx
-│   │   └── SystemHealth.tsx      # steve.integrations status per row
-│   ├── components/
-│   ├── api/
-│   │   └── client.ts             # read-only calls into steve-heart's dashboard API
-│   └── main.tsx
-└── package.json
+├── app/
+│   ├── layout.tsx          # required root layout -- minimal, no real UI yet
+│   ├── page.tsx             # root route stub
+│   ├── memory/
+│   │   └── page.tsx         # steve.memories + identity/wardrobe/environment
+│   ├── logs/
+│   │   └── page.tsx
+│   └── health/
+│       └── page.tsx         # steve.integrations status per row
+├── components/
+├── lib/
+│   └── api-client.ts        # read-only calls into steve-heart's dashboard API
+├── package.json
+├── tsconfig.json
+├── next.config.mjs
+├── .env.example
+└── .gitignore
 ```
+
+Note on why `app/layout.tsx` and each `page.tsx` have minimal placeholder content rather than being fully empty like the rest of the scaffold: Next.js's App Router requires a valid root layout and a valid default export in every routed `page.tsx` just to build. Unlike the old Vite setup (where an empty, unrouted component file didn't block the build), an empty `page.tsx` here would fail `next build` outright. So these are connective tissue only — `return null`, nothing more — not real UI.
 
 ## Status
 
