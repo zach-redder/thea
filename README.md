@@ -20,6 +20,20 @@ steve-bones doesn't participate in runtime request handling at all — it exists
 - **GitHub Actions** — CI/CD
 - Target deployment hardware: Beelink SER7 or Intel NUC 13 Pro (32GB RAM, 1TB NVMe), migrating from laptop-based development via a straight copy of the compose setup
 
+## Directory layout assumption
+
+`docker-compose.yml`'s build contexts (e.g. `../steve-heart`, `../steve-brain`) assume all six repos are cloned as sibling directories under one parent folder:
+
+```
+steve/
+├── steve-heart/
+├── steve-senses/
+├── steve-brain/
+├── steve-muscles/
+├── steve-bones/
+└── steve-body/
+```
+
 ## Planned structure
 
 ```
