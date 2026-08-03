@@ -1,14 +1,14 @@
-# steve-bones
+# thea-bones
 
-DevOps for STEVE — Dockerfiles, docker-compose orchestration, and CI/CD across all six repos.
+DevOps for thea — Dockerfiles, docker-compose orchestration, and CI/CD across all six repos.
 
 ## Overview
 
-steve-bones is the one repo whose whole job is to know about all the others. It's not a service that runs as part of STEVE's request/response loop — it's the deployment layer that brings every other repo up together, on a laptop during development or on the eventual dedicated hardware (Beelink SER7 or Intel NUC 13 Pro).
+thea-bones is the one repo whose whole job is to know about all the others. It's not a service that runs as part of thea's request/response loop — it's the deployment layer that brings every other repo up together, on a laptop during development or on the eventual dedicated hardware (Beelink SER7 or Intel NUC 13 Pro).
 
-## Role in the STEVE system
+## Role in the thea system
 
-steve-bones doesn't participate in runtime request handling at all — it exists one level above the other five repos:
+thea-bones doesn't participate in runtime request handling at all — it exists one level above the other five repos:
 
 - Defines the `docker-compose.yml` that runs Postgres, Redis, and all six services together.
 - Owns CI/CD (GitHub Actions) for the whole system, since it's the only place that can meaningfully build and test cross-repo integration.
@@ -22,22 +22,22 @@ steve-bones doesn't participate in runtime request handling at all — it exists
 
 ## Directory layout assumption
 
-`docker-compose.yml`'s build contexts (e.g. `../steve-heart`, `../steve-brain`) assume all six repos are cloned as sibling directories under one parent folder:
+`docker-compose.yml`'s build contexts (e.g. `../thea-heart`, `../thea-brain`) assume all six repos are cloned as sibling directories under one parent folder:
 
 ```
-steve/
-├── steve-heart/
-├── steve-senses/
-├── steve-brain/
-├── steve-muscles/
-├── steve-bones/
-└── steve-body/
+thea/
+├── thea-heart/
+├── thea-senses/
+├── thea-brain/
+├── thea-muscles/
+├── thea-bones/
+└── thea-body/
 ```
 
 ## Planned structure
 
 ```
-steve-bones/
+thea-bones/
 ├── docker-compose.yml               # postgres, redis, and all 6 services
 ├── docker-compose.override.yml      # laptop dev overrides
 ├── dockerfiles/
@@ -55,8 +55,8 @@ steve-bones/
 
 ## Status
 
-**Not yet implemented.** Should come together incrementally as each other repo reaches a runnable state, rather than all at once — start with a `docker-compose.yml` covering just Postgres + Redis + steve-brain, and add services as they exist.
+**Not yet implemented.** Should come together incrementally as each other repo reaches a runnable state, rather than all at once — start with a `docker-compose.yml` covering just Postgres + Redis + thea-brain, and add services as they exist.
 
 ## Related repos
 
-All of them — steve-heart · steve-brain · steve-senses · steve-muscles · steve-body
+All of them — thea-heart · thea-brain · thea-senses · thea-muscles · thea-body
