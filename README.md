@@ -1,37 +1,37 @@
-# steve-heart
+# thea-heart
 
-Core orchestration for STEVE — the process that turns a trigger into a response. Everything else in the STEVE system exists to feed this repo data or carry out what it decides.
+Core orchestration for thea — the process that turns a trigger into a response. Everything else in the thea system exists to feed this repo data or carry out what it decides.
 
 ## Overview
 
-steve-heart is the only repo that talks to Claude. It receives triggers (wake word, ambient audio, vision events, or scheduled jobs), assembles context from steve-brain, calls the Claude API, dispatches any tool calls, and produces the final response. It also owns the proactive scheduler and the post-conversation memory extraction pass.
+thea-heart is the only repo that talks to Claude. It receives triggers (wake word, ambient audio, vision events, or scheduled jobs), assembles context from thea-brain, calls the Claude API, dispatches any tool calls, and produces the final response. It also owns the proactive scheduler and the post-conversation memory extraction pass.
 
-If you're trying to understand how STEVE "thinks," this is the repo to read.
+If you're trying to understand how thea "thinks," this is the repo to read.
 
-## Role in the STEVE system
+## Role in the thea system
 
-steve-heart is the hub — every other repo either feeds it input or receives commands from it:
+thea-heart is the hub — every other repo either feeds it input or receives commands from it:
 
-- **steve-senses → steve-heart**: perception events (wake word triggers, filtered ambient audio, vision events) arrive here for classification.
-- **steve-heart → steve-brain**: direct DB connection (not HTTP — see steve-brain's README for why) for context assembly and memory read/write.
-- **steve-heart → steve-muscles**: dispatches actuation commands (speak this, turn on that light) and receives no direct response back beyond confirmation.
-- **steve-heart ↔ MCP servers / native tools**: owns all tool orchestration, per `steve.tools` and `steve.integrations`.
-- **steve-body** reads from steve-heart (via a future thin HTTP API) for dashboard display — steve-heart doesn't call steve-body.
+- **thea-senses → thea-heart**: perception events (wake word triggers, filtered ambient audio, vision events) arrive here for classification.
+- **thea-heart → thea-brain**: direct DB connection (not HTTP — see thea-brain's README for why) for context assembly and memory read/write.
+- **thea-heart → thea-muscles**: dispatches actuation commands (speak this, turn on that light) and receives no direct response back beyond confirmation.
+- **thea-heart ↔ MCP servers / native tools**: owns all tool orchestration, per `thea.tools` and `thea.integrations`.
+- **thea-body** reads from thea-heart (via a future thin HTTP API) for dashboard display — thea-heart doesn't call thea-body.
 
 ## Tech stack
 
 - **Python 3.11+**
-- **FastAPI** — webhook endpoints for inbound triggers from steve-senses and the scheduler
+- **FastAPI** — webhook endpoints for inbound triggers from thea-senses and the scheduler
 - **Anthropic Python SDK** — Claude API calls, prompt caching, MCP server connections via `mcp_servers`
 - **APScheduler** — proactive scheduler (morning brief, stale-data checks, daily synthesis)
-- **SQLAlchemy** (via steve-brain) — direct DB access, no ORM boundary between repos
-- **redis-py** — session state via steve-brain's session store
-- **Voyage AI Python client** — embedding generation for memory writes (steve-brain never calls this itself)
+- **SQLAlchemy** (via thea-brain) — direct DB access, no ORM boundary between repos
+- **redis-py** — session state via thea-brain's session store
+- **Voyage AI Python client** — embedding generation for memory writes (thea-brain never calls this itself)
 
 ## Planned structure
 
 ```
-steve-heart/
+thea-heart/
 ├── app/
 │   ├── main.py
 │   ├── router/
@@ -39,20 +39,20 @@ steve-heart/
 │   │   └── webhooks.py            # inbound triggers from senses/scheduler
 │   ├── context/
 │   │   ├── builder.py             # assembles cached + dynamic layers, in order
-│   │   ├── retrieval.py           # decides what's relevant, calls steve-brain repos
-│   │   └── prompt_loader.py       # pulls steve.prompts, picks situational prompt
+│   │   ├── retrieval.py           # decides what's relevant, calls thea-brain repos
+│   │   └── prompt_loader.py       # pulls thea.prompts, picks situational prompt
 │   ├── claude/
 │   │   ├── client.py              # API wrapper, prompt caching
 │   │   └── tool_dispatch.py       # routes to MCP vs native handlers
 │   ├── tools/
-│   │   ├── mcp_config.py          # server configs per steve.integrations row
+│   │   ├── mcp_config.py          # server configs per thea.integrations row
 │   │   └── native/
 │   │       ├── plaid.py
 │   │       ├── weather.py
 │   │       └── maps.py
 │   ├── memory/
 │   │   ├── extraction.py          # post-turn fast-model pass
-│   │   └── writer.py              # calls steve-brain's memory_repo
+│   │   └── writer.py              # calls thea-brain's memory_repo
 │   ├── scheduler/
 │   │   ├── proactive.py           # APScheduler setup
 │   │   └── jobs/
@@ -60,15 +60,15 @@ steve-heart/
 │   │       ├── stale_data_check.py
 │   │       └── daily_synthesis.py # rewrites identity.context
 │   └── output/
-│       └── dispatch.py            # → steve-muscles or steve-body
+│       └── dispatch.py            # → thea-muscles or thea-body
 ├── tests/
 └── requirements.txt
 ```
 
 ## Status
 
-**Not yet implemented.** This README documents the intended structure based on the architecture designed in planning — no code exists in this repo yet. steve-brain should be built and migrated first, since steve-heart's context builder depends on real tables to query against.
+**Not yet implemented.** This README documents the intended structure based on the architecture designed in planning — no code exists in this repo yet. thea-brain should be built and migrated first, since thea-heart's context builder depends on real tables to query against.
 
 ## Related repos
 
-steve-brain · steve-senses · steve-muscles · steve-bones · steve-body
+thea-brain · thea-senses · thea-muscles · thea-bones · thea-body
