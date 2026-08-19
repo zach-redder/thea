@@ -123,6 +123,24 @@ imports yet, but should be disambiguated (e.g. renaming `brain`'s
 installed module, or moving to a `src/` layout) before real code starts
 importing across that boundary.
 
+## Git history: preserved, but not `--follow`-able
+
+Each of the six source repos' full commit history (author, date, message,
+and content — 37 commits total) is preserved and reachable from `main` via
+`git log --oneline` / `git log --all`. The merge technique used
+(`git merge -s ours --no-commit` + `git read-tree --prefix=<dir>/`, since
+`git filter-repo` wasn't available) lands each repo's commits as real
+ancestors of the merge commit that introduced its subdirectory.
+
+One caveat: because each file's path changed at the exact moment it was
+merged (e.g. `README.md` → `brain/README.md`), `git log --follow` and
+`git blame` can't automatically bridge that rename — they see the file as
+"added" at the merge commit and stop there, since git's rename detection
+doesn't cross merge boundaries this way by default. The pre-merge history
+is still fully there; finding it just requires `git log --all` or knowing
+to look at the merge commit's second parent (e.g. `git log <merge-sha>^2`)
+rather than relying on `--follow` from a current file path.
+
 ## Naming: the STEVE → THEA rename
 
 The product was renamed from "STEVE" to "THEA" at some point before this
