@@ -11,7 +11,7 @@ import argparse
 from datetime import date, datetime
 from pathlib import Path
 
-from app.schema_reader import default_xlsx_path, load_registry, read_table_rows
+from app.schema_reader import load_registry, read_table_rows, require_xlsx_path
 
 SEED_FILE = Path(__file__).parent / "local_seed.sql"
 
@@ -55,7 +55,11 @@ def render_insert(schema_name: str, table_name: str, rows: list[dict]) -> str | 
 
 def generate(xlsx_path: Path) -> str:
     registry = load_registry(xlsx_path)
-    blocks = ["-- Generated from THEA DB.xlsx by seed/import_from_sheet.py. Contains real personal data -- never commit this file."]
+    header_comment = (
+        "-- Generated from THEA DB.xlsx by seed/import_from_sheet.py."
+        " Contains real personal data -- never commit this file."
+    )
+    blocks = [header_comment]
     for schema in registry.schemas:
         if schema.name == "public":
             continue
@@ -72,10 +76,7 @@ def main() -> None:
     parser.add_argument("--xlsx", type=Path, default=None)
     args = parser.parse_args()
 
-    xlsx_path = args.xlsx or default_xlsx_path()
-    if not xlsx_path.exists():
-        raise SystemExit(f"Schema source not found: {xlsx_path}\nSet --xlsx or THEA_SCHEMA_XLSX to THEA DB.xlsx's location.")
-
+    xlsx_path = require_xlsx_path(args.xlsx)
     content = generate(xlsx_path)
     SEED_FILE.write_text(content, encoding="utf-8", newline="\n")
     print(f"wrote {SEED_FILE} ({len(content.splitlines())} lines) -- gitignored, not committed")

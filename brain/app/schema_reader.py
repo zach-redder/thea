@@ -139,3 +139,13 @@ def default_xlsx_path() -> Path:
     if env_path:
         return Path(env_path)
     return Path(__file__).resolve().parents[3] / "THEA DB.xlsx"
+
+
+def require_xlsx_path(cli_arg: Path | None) -> Path:
+    xlsx_path = cli_arg or default_xlsx_path()
+    if not xlsx_path.exists():
+        raise SystemExit(
+            f"Schema source not found: {xlsx_path}\n"
+            "Set --xlsx or THEA_SCHEMA_XLSX to THEA DB.xlsx's location."
+        )
+    return xlsx_path

@@ -1,0 +1,25 @@
+# Laptop-dev overrides, auto-merged by `docker compose up` when present
+# alongside docker-compose.yml (per thea-bones' original design intent --
+# see docs/archive/thea-bones-original-README.md). Bind-mounts source so
+# edits take effect without a rebuild, once there's real code to edit.
+services:
+  heart:
+    volumes:
+      - ./heart/app:/repo/heart/app
+    command: ["uv", "run", "--project", "/repo", "--package", "heart", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  muscles:
+    volumes:
+      - ./muscles/app:/repo/muscles/app
+    command: ["uv", "run", "--project", "/repo", "--package", "muscles", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
+
+  senses:
+    volumes:
+      - ./senses/app:/repo/senses/app
+      - ./senses/models:/repo/senses/models
+
+  body:
+    volumes:
+      - ./body:/app
+      - /app/node_modules
+      - /app/.next

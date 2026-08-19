@@ -1,0 +1,85 @@
+# Postgres, Redis, and the migrate job will actually come up healthy.
+# heart/muscles/senses/body build successfully but have nothing to run yet
+# (their app code is still scaffolding) -- see docs/ARCHITECTURE.md.
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: thea
+      POSTGRES_PASSWORD: thea
+      POSTGRES_DB: thea
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U thea"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  migrate:
+    build:
+      context: ./brain
+    environment:
+      DATABASE_URL: postgresql://thea:thea@postgres:5432/thea
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  heart:
+    build:
+      context: .
+      dockerfile: heart/Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: heart/.env
+        required: false
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
+
+  muscles:
+    build:
+      context: .
+      dockerfile: muscles/Dockerfile
+    ports:
+      - "8001:8001"
+    env_file:
+      - path: muscles/.env
+        required: false
+    depends_on:
+      - heart
+
+  senses:
+    build:
+      context: .
+      dockerfile: senses/Dockerfile
+    env_file:
+      - path: senses/.env
+        required: false
+    depends_on:
+      - heart
+
+  body:
+    build:
+      context: ./body
+    ports:
+      - "3000:3000"
+    env_file:
+      - path: body/.env
+        required: false
+    depends_on:
+      - heart
+
+volumes:
+  pgdata:

@@ -1,5 +1,7 @@
 # Auto-generated from THEA DB.xlsx via app/schema_reader.py. Do not hand-edit; re-run generate_models.py.
+
 from sqlalchemy import Boolean, Column, DateTime, Integer, Text
+
 from app.models.base import Base
 
 

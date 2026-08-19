@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          version: "0.9.17"
+      - run: uv sync --all-extras
+      - run: uvx ruff@0.9 check .
+      - name: Verify brain migrations/models are in sync with THEA DB.xlsx
+        if: false
+        # Regeneration needs THEA DB.xlsx, which contains real personal data
+        # and is never committed (see brain/seed/README.md) -- so this check
+        # can't run in CI as written. Left here as documentation of intent;
+        # flip to `if: true` if a sanitized/structure-only fixture sheet is
+        # ever added for CI purposes.
+        run: |
+          uv run --package brain python brain/generate_migrations.py --check
+
+  body:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: body
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install
+      - run: npm run lint
+      - run: npm run build

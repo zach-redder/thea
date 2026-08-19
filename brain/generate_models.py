@@ -6,9 +6,14 @@ import argparse
 import re
 from pathlib import Path
 
-from app.schema_reader import TYPE_MAP, TYPE_OVERRIDES, Column, Table, default_xlsx_path, load_registry
+from app.schema_reader import TYPE_MAP, TYPE_OVERRIDES, Column, Table, load_registry, require_xlsx_path
 
 MODELS_DIR = Path(__file__).parent / "app" / "models"
+
+HEADER_COMMENT = (
+    "# Auto-generated from THEA DB.xlsx via app/schema_reader.py."
+    " Do not hand-edit; re-run generate_models.py."
+)
 
 SQLALCHEMY_TYPE_MAP = {
     "INTEGER": "Integer",
@@ -90,32 +95,43 @@ def render_table_class(table: Table) -> tuple[str, set[str]]:
     return "\n".join(lines), imports
 
 
-def render_module(schema_name: str, tables: list[Table]) -> str:
-    all_imports: set[str] = {"from app.models.base import Base"}
+def render_module(
+    schema_name: str,
+    tables: list[Table],
+    extra_imports: set[str] | None = None,
+    extra_classes: list[str] | None = None,
+) -> str:
+    all_imports: set[str] = {"from app.models.base import Base"} | (extra_imports or set())
     class_blocks: list[str] = []
     for table in tables:
         block, imports = render_table_class(table)
         class_blocks.append(block)
         all_imports |= imports
+    class_blocks.extend(extra_classes or [])
 
-    sqlalchemy_imports = sorted(i for i in all_imports if i.startswith("from sqlalchemy import"))
-    other_imports = sorted(i for i in all_imports if not i.startswith("from sqlalchemy import"))
+    first_party = sorted(i for i in all_imports if i.startswith("from app."))
+    third_party = sorted(i for i in all_imports if not i.startswith("from app."))
+
+    sqlalchemy_imports = [i for i in third_party if i.startswith("from sqlalchemy import")]
+    other_third_party = sorted(i for i in third_party if not i.startswith("from sqlalchemy import"))
     merged_names: set[str] = set()
     for imp in sqlalchemy_imports:
-        names = imp.removeprefix("from sqlalchemy import ").split(", ")
-        merged_names |= set(names)
-    header = "# Auto-generated from THEA DB.xlsx via app/schema_reader.py. Do not hand-edit; re-run generate_models.py.\n"
-    import_lines = [f"from sqlalchemy import {', '.join(sorted(merged_names))}"] + other_imports
-    return header + "\n".join(import_lines) + "\n\n\n" + "\n\n\n".join(class_blocks) + "\n"
+        merged_names |= set(imp.removeprefix("from sqlalchemy import ").split(", "))
+
+    third_party_lines = other_third_party + [f"from sqlalchemy import {', '.join(sorted(merged_names))}"]
+    third_party_lines.sort()
+
+    import_block = "\n".join(third_party_lines) + "\n\n" + "\n".join(first_party)
+    return HEADER_COMMENT + "\n\n" + import_block + "\n\n\n" + "\n\n\n".join(class_blocks) + "\n"
 
 
-BASE_MODULE = '''# Auto-generated from THEA DB.xlsx via app/schema_reader.py. Do not hand-edit; re-run generate_models.py.
+BASE_MODULE = f"""{HEADER_COMMENT}
 from sqlalchemy.orm import DeclarativeBase
 
 
 class Base(DeclarativeBase):
     pass
-'''
+"""
 
 # thea.memories isn't in the live sheet yet (see README.md "Known open items" #1) —
 # mirrors the hardcoded fallback in generate_migrations.py.
@@ -139,15 +155,15 @@ def generate(xlsx_path: Path) -> dict[str, str]:
     registry = load_registry(xlsx_path)
     output = {"base.py": BASE_MODULE}
     for schema in registry.schemas:
-        content = render_module(schema.name, schema.tables)
         if schema.name == "thea":
-            if "from pgvector.sqlalchemy import Vector" not in content:
-                content = content.replace(
-                    "from app.models.base import Base\n",
-                    "from app.models.base import Base\nfrom pgvector.sqlalchemy import Vector\n",
-                    1,
-                )
-            content = content.rstrip("\n") + "\n\n\n" + MEMORIES_FALLBACK_CLASS + "\n"
+            content = render_module(
+                schema.name,
+                schema.tables,
+                extra_imports={"from pgvector.sqlalchemy import Vector"},
+                extra_classes=[MEMORIES_FALLBACK_CLASS],
+            )
+        else:
+            content = render_module(schema.name, schema.tables)
         output[f"{schema.name}.py"] = content
     return output
 
@@ -157,10 +173,7 @@ def main() -> None:
     parser.add_argument("--xlsx", type=Path, default=None)
     args = parser.parse_args()
 
-    xlsx_path = args.xlsx or default_xlsx_path()
-    if not xlsx_path.exists():
-        raise SystemExit(f"Schema source not found: {xlsx_path}\nSet --xlsx or THEA_SCHEMA_XLSX to THEA DB.xlsx's location.")
-
+    xlsx_path = require_xlsx_path(args.xlsx)
     files = generate(xlsx_path)
     MODELS_DIR.mkdir(parents=True, exist_ok=True)
     for old in MODELS_DIR.glob("*.py"):
