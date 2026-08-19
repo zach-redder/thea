@@ -1,23 +1,10 @@
--- External service connections including Notion, Spotify, Plaid and Google Calendar
-CREATE TABLE steve.integrations (
-    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name TEXT,
-    enabled BOOLEAN,
-    api_endpoint TEXT,
-    auth_type TEXT,
-    scopes TEXT[],
-    last_synced TIMESTAMPTZ,
-    status TEXT,
-    notes TEXT,
-    updated_at TIMESTAMPTZ
-);
-
--- Core STEVE system settings including model, wake word, voice and behavior toggles
-CREATE TABLE steve.config (
+-- Core THEA system settings including model, wake word, voice and behavior toggles
+CREATE TABLE thea.config (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name TEXT,
     version TEXT,
     voice TEXT,
+    response_style TEXT,
     wake_word TEXT,
     is_listening BOOLEAN,
     default_model TEXT,
@@ -36,8 +23,8 @@ CREATE TABLE steve.config (
     updated_at TIMESTAMPTZ
 );
 
--- System prompts per context that define how STEVE thinks and responds
-CREATE TABLE steve.prompts (
+-- System prompts per context that define how THEA thinks and responds
+CREATE TABLE thea.prompts (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name TEXT NOT NULL,
     context TEXT,
@@ -47,8 +34,22 @@ CREATE TABLE steve.prompts (
     updated_at TIMESTAMPTZ
 );
 
--- Functions STEVE can call during conversations with confirmation requirements
-CREATE TABLE steve.tools (
+-- External service connections including Notion, Spotify, Plaid and Google Calendar
+CREATE TABLE thea.integrations (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name TEXT,
+    enabled BOOLEAN,
+    api_endpoint TEXT,
+    auth_type TEXT,
+    scopes TEXT[],
+    last_synced TIMESTAMPTZ,
+    status TEXT,
+    notes TEXT,
+    updated_at TIMESTAMPTZ
+);
+
+-- Functions THEA can call during conversations with confirmation requirements
+CREATE TABLE thea.tools (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
@@ -58,14 +59,14 @@ CREATE TABLE steve.tools (
     requires_confirm BOOLEAN,
     notes TEXT,
     updated_at TIMESTAMPTZ,
-    FOREIGN KEY (integration_id) REFERENCES steve.integrations(id)
+    FOREIGN KEY (integration_id) REFERENCES thea.integrations(id)
 );
 
 -- Distilled episodic memories from conversations and ambient events, embedded for semantic recall (NOT YET IN LIVE SHEET -- sync it)
-CREATE TABLE steve.memories (
+CREATE TABLE thea.memories (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     content TEXT NOT NULL,
-    embedding VECTOR(1024),
+    embedding VECTOR(1536),
     occurred_at TIMESTAMPTZ,
     source TEXT,
     related_table TEXT,

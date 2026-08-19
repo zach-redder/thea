@@ -17,7 +17,7 @@ CREATE TABLE wardrobe.clothing (
     description TEXT,
     condition TEXT,
     owned BOOLEAN,
-    embedding VECTOR(1024)
+    embedding VECTOR(1536)
 );
 
 -- All footwear with style, silhouette and sizing details
@@ -39,7 +39,7 @@ CREATE TABLE wardrobe.shoes (
     description TEXT,
     condition TEXT,
     owned BOOLEAN,
-    embedding VECTOR(1024)
+    embedding VECTOR(1536)
 );
 
 -- Rings, necklaces, bracelets and earrings with material and finish details
@@ -59,7 +59,7 @@ CREATE TABLE wardrobe.jewelry (
     description TEXT,
     condition TEXT,
     owned BOOLEAN,
-    embedding VECTOR(1024)
+    embedding VECTOR(1536)
 );
 
 -- Bags, watches, sunglasses, gloves and other accessories
@@ -79,7 +79,7 @@ CREATE TABLE wardrobe.accessories (
     condition TEXT,
     owned BOOLEAN,
     specs JSONB,
-    embedding VECTOR(1024)
+    embedding VECTOR(1536)
 );
 
 -- Saved outfit combinations with ratings and wear history
@@ -95,10 +95,7 @@ CREATE TABLE wardrobe.outfits (
     rating INTEGER,
     worn_count INTEGER,
     last_worn DATE,
-    embedding VECTOR(1024),
+    embedding VECTOR(1536),
     updated_at TIMESTAMPTZ,
-    FOREIGN KEY (shoe_id) REFERENCES wardrobe.shoes(id),
-    FOREIGN KEY (clothing_ids) REFERENCES wardrobe.clothing(id),
-    FOREIGN KEY (jewelry_ids) REFERENCES wardrobe.jewelry(id),
-    FOREIGN KEY (accessory_ids) REFERENCES wardrobe.accessories(id)
+    FOREIGN KEY (shoe_id) REFERENCES wardrobe.shoes(id)
 );

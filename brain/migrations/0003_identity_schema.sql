@@ -73,7 +73,23 @@ CREATE TABLE identity.goals (
     status TEXT,
     target_date DATE,
     progress_notes TEXT,
-    embedding VECTOR(1024),
+    embedding VECTOR(1536),
+    updated_at TIMESTAMPTZ
+);
+
+-- People in Zachs life including friends, family, colleagues and mentors
+CREATE TABLE identity.relationships (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name TEXT NOT NULL,
+    relationship_type TEXT,
+    closeness INTEGER,
+    shared_interests TEXT[],
+    birthday DATE,
+    contact_frequency TEXT,
+    location TEXT,
+    last_interacted DATE,
+    notes TEXT,
+    embedding VECTOR(1536),
     updated_at TIMESTAMPTZ
 );
 
@@ -91,23 +107,7 @@ CREATE TABLE identity.projects (
     notes TEXT,
     start_date DATE,
     end_date DATE,
-    embedding VECTOR(1024),
-    updated_at TIMESTAMPTZ
-);
-
--- People in Zachs life including friends, family, colleagues and mentors
-CREATE TABLE identity.relationships (
-    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name TEXT NOT NULL,
-    relationship_type TEXT,
-    closeness INTEGER,
-    shared_interests TEXT[],
-    birthday DATE,
-    contact_frequency TEXT,
-    location TEXT,
-    last_interacted DATE,
-    notes TEXT,
-    embedding VECTOR(1024),
+    embedding VECTOR(1536),
     updated_at TIMESTAMPTZ
 );
 
@@ -119,7 +119,7 @@ CREATE TABLE identity.skills (
     proficiency_level INTEGER,
     related_projects INTEGER[],
     notes TEXT,
-    embedding VECTOR(1024),
+    embedding VECTOR(1536),
     updated_at TIMESTAMPTZ
 );
 
@@ -132,7 +132,7 @@ CREATE TABLE identity.interests (
     description TEXT,
     examples TEXT[],
     notes TEXT,
-    embedding VECTOR(1024),
+    embedding VECTOR(1536),
     updated_at TIMESTAMPTZ
 );
 
@@ -149,7 +149,7 @@ CREATE TABLE identity.routines (
     updated_at TIMESTAMPTZ
 );
 
--- Budget priorities and tracked subscriptions; live balances and transactions come from Plaid via steve.integrations
+-- Budget priorities and tracked subscriptions; live balances and transactions come from Plaid via thea.integrations
 CREATE TABLE identity.finances (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     category TEXT,

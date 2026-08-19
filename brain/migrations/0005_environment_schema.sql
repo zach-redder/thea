@@ -7,21 +7,6 @@ CREATE TABLE environment.rooms (
     updated_at TIMESTAMPTZ
 );
 
--- Smart home devices Zach owns including lights, speakers and thermostats
-CREATE TABLE environment.devices (
-    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name TEXT NOT NULL,
-    type TEXT,
-    brand TEXT,
-    room_id INTEGER,
-    device_address TEXT,
-    integration_id INTEGER,
-    notes TEXT,
-    updated_at TIMESTAMPTZ,
-    FOREIGN KEY (room_id) REFERENCES environment.rooms(id),
-    FOREIGN KEY (integration_id) REFERENCES steve.integrations(id)
-);
-
 -- Furniture, fitness equipment and collectibles, combined by category and tracked per room
 CREATE TABLE environment.items (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -35,9 +20,24 @@ CREATE TABLE environment.items (
     purchase_price NUMERIC,
     specs JSONB,
     notes TEXT,
-    embedding VECTOR(1024),
+    embedding VECTOR(1536),
     updated_at TIMESTAMPTZ,
     FOREIGN KEY (room_id) REFERENCES environment.rooms(id)
+);
+
+-- Smart home devices Zach owns including lights, speakers and thermostats
+CREATE TABLE environment.devices (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name TEXT NOT NULL,
+    type TEXT,
+    brand TEXT,
+    room_id INTEGER,
+    device_address TEXT,
+    integration_id INTEGER,
+    notes TEXT,
+    updated_at TIMESTAMPTZ,
+    FOREIGN KEY (room_id) REFERENCES environment.rooms(id),
+    FOREIGN KEY (integration_id) REFERENCES thea.integrations(id)
 );
 
 -- Important documents including passport, lease, insurance and expiry dates
@@ -87,7 +87,7 @@ CREATE TABLE environment.locations (
     visit_frequency TEXT,
     favorite BOOLEAN,
     notes TEXT,
-    embedding VECTOR(1024),
+    embedding VECTOR(1536),
     updated_at TIMESTAMPTZ
 );
 

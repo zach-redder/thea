@@ -1,12 +1,12 @@
--- Auto-generated from STEVE_DB sheet via app/schema_reader.py. Do not hand-edit; re-run generate_migrations.py.
+-- Auto-generated from THEA DB.xlsx via app/schema_reader.py. Do not hand-edit; re-run generate_migrations.py.
 CREATE EXTENSION IF NOT EXISTS vector;
 CREATE SCHEMA IF NOT EXISTS public;
-CREATE SCHEMA IF NOT EXISTS steve;
+CREATE SCHEMA IF NOT EXISTS thea;
 CREATE SCHEMA IF NOT EXISTS identity;
 CREATE SCHEMA IF NOT EXISTS wardrobe;
 CREATE SCHEMA IF NOT EXISTS environment;
 
--- Registry of all schemas in the STEVE database
+-- Registry of all schemas in the THEA database
 CREATE TABLE public.schema_registry (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     schema_name TEXT,
