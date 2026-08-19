@@ -1,0 +1,6 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+homeassistant-api>=4.1
+paho-mqtt>=2.1
+elevenlabs>=1.7
+python-dotenv>=1.0
