@@ -1,2 +1,17 @@
 .env
 *.local.yml
+
+# Python / uv
+.venv/
+__pycache__/
+*.pyc
+.ruff_cache/
+
+# Node / Next.js
+node_modules/
+.next/
+
+# thea-brain schema source + generated local seed data (see brain/seed/README.md)
+brain/seed/local_seed.sql
+*.xlsx
+THEA DB.xlsx
