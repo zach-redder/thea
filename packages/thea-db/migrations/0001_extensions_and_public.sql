@@ -1,4 +1,4 @@
--- Auto-generated from THEA DB.xlsx via app/schema_reader.py. Do not hand-edit; re-run generate_migrations.py.
+-- Auto-generated from THEA DB.xlsx via thea_db/schema_reader.py. Do not hand-edit; re-run generate_migrations.py.
 CREATE EXTENSION IF NOT EXISTS vector;
 CREATE SCHEMA IF NOT EXISTS public;
 CREATE SCHEMA IF NOT EXISTS thea;

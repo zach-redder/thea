@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 from openpyxl import load_workbook
 
@@ -17,7 +19,7 @@ TYPE_MAP = {
     "jsonb": "JSONB",
 }
 
-# Sheet-side type bugs documented in brain/README.md "Known open items" #2.
+# Sheet-side type bugs documented in docs/data-model.md "Known schema issues".
 # Fix the sheet, then remove these.
 TYPE_OVERRIDES: dict[tuple[str, str], str] = {
     ("config", "name"): "TEXT",
@@ -46,7 +48,7 @@ class Table:
     schema_id: int
     name: str
     description: str
-    schema: "Schema" = None
+    schema: Schema
     columns: list[Column] = field(default_factory=list)
 
 
@@ -66,7 +68,7 @@ class Registry:
         return next(s for s in self.schemas if s.name == name)
 
 
-def _data_rows(ws):
+def _data_rows(ws: Any) -> Iterator[tuple[Any, ...]]:
     for row in ws.iter_rows(values_only=True):
         if not row or row[0] in (None, ""):
             continue
@@ -117,7 +119,7 @@ def load_registry(xlsx_path: Path) -> Registry:
     return Registry(schemas=sorted(schemas.values(), key=lambda s: s.id))
 
 
-def read_table_rows(xlsx_path: Path, sheet_name: str) -> list[dict]:
+def read_table_rows(xlsx_path: Path, sheet_name: str) -> list[dict[str, Any]]:
     wb = load_workbook(xlsx_path, data_only=True, read_only=True)
     ws = wb[sheet_name]
     rows = list(ws.iter_rows(values_only=True))
@@ -128,7 +130,7 @@ def read_table_rows(xlsx_path: Path, sheet_name: str) -> list[dict]:
             continue
         if not isinstance(row[0], (int, float)):
             continue
-        data_rows.append(dict(zip(header, row)))
+        data_rows.append(dict(zip(header, row, strict=False)))
     return data_rows
 
 
@@ -138,14 +140,14 @@ def default_xlsx_path() -> Path:
     env_path = os.environ.get("THEA_SCHEMA_XLSX")
     if env_path:
         return Path(env_path)
-    return Path(__file__).resolve().parents[3] / "THEA DB.xlsx"
+    # packages/thea-db/src/thea_db/schema_reader.py -> parents[5] is the folder that holds thea/
+    return Path(__file__).resolve().parents[5] / "THEA DB.xlsx"
 
 
 def require_xlsx_path(cli_arg: Path | None) -> Path:
     xlsx_path = cli_arg or default_xlsx_path()
     if not xlsx_path.exists():
         raise SystemExit(
-            f"Schema source not found: {xlsx_path}\n"
-            "Set --xlsx or THEA_SCHEMA_XLSX to THEA DB.xlsx's location."
+            f"Schema source not found: {xlsx_path}\nSet --xlsx or THEA_SCHEMA_XLSX to THEA DB.xlsx's location."
         )
     return xlsx_path

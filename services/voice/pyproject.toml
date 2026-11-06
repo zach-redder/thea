@@ -1,14 +1,37 @@
 [project]
-name = "senses"
+name = "thea-voice"
 version = "0.1.0"
-requires-python = ">=3.11"
-description = "Always-on perception for thea — wake word, ambient audio, and vision."
-# thea-senses/requirements.txt was empty in the source repo — nothing was ever
-# pinned. The README documents an intended stack (Porcupine, Silero VAD,
-# faster-whisper, pyannote.audio, a local vision model) but none of it has
-# been declared as an installable dependency yet. Pin these when senses is
-# actually implemented rather than guessing versions now.
-dependencies = []
+description = "THEA's voice I/O: wake word, VAD, speech-to-text, speaker detection, text-to-speech and room routing."
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.32",
+  "pydantic-settings>=2.6",
+  "httpx>=0.27",
+  "thea-contracts",
+]
 
-[tool.uv]
-package = false
+[project.optional-dependencies]
+# Heavy, hardware/model-dependent stack. Opt in with `uv sync --extra models`
+# once the pipeline is implemented; versions get tightened at that point.
+models = [
+  "pvporcupine>=3.0",
+  "silero-vad>=5.1",
+  "faster-whisper>=1.1",
+  "elevenlabs>=1.50",
+  "sounddevice>=0.5",
+]
+diarization = ["pyannote.audio>=3.3"]
+
+[project.scripts]
+thea-voice = "thea_voice.main:run"
+
+[tool.uv.sources]
+thea-contracts = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/thea_voice"]

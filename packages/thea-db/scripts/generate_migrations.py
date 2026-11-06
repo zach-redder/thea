@@ -1,22 +1,25 @@
 #!/usr/bin/env python3
 """Regenerates migrations/*.sql from THEA DB.xlsx. Do not hand-edit the output."""
+
 from __future__ import annotations
 
 import argparse
 import re
 from pathlib import Path
 
-from app.schema_reader import (
+from thea_db.schema_reader import (
     REFERENCES_RE,
     TYPE_MAP,
     TYPE_OVERRIDES,
     Column,
+    Registry,
+    Schema,
     Table,
     load_registry,
     require_xlsx_path,
 )
 
-MIGRATIONS_DIR = Path(__file__).parent / "migrations"
+MIGRATIONS_DIR = Path(__file__).resolve().parents[1] / "migrations"
 
 # thea.memories isn't in the live sheet yet (see README.md "Known open items" #1).
 # Kept as a hardcoded fallback until the sheet is synced. vector(1536) to match
@@ -106,11 +109,11 @@ def render_table(table: Table) -> str:
     return f"{header}CREATE TABLE {table.schema.name}.{table.name} (\n{body}\n);"
 
 
-def render_public_schema(registry) -> str:
+def render_public_schema(registry: Registry) -> str:
     public = registry.schema("public")
     header_comment = (
-        "-- Auto-generated from THEA DB.xlsx via app/schema_reader.py."
-        " Do not hand-edit; re-run generate_migrations.py."
+        "-- Auto-generated from THEA DB.xlsx via thea_db/schema_reader.py. "
+        "Do not hand-edit; re-run generate_migrations.py."
     )
     lines = [header_comment, "CREATE EXTENSION IF NOT EXISTS vector;"]
     for schema in registry.schemas:
@@ -122,7 +125,7 @@ def render_public_schema(registry) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
-def render_schema_migration(schema, add_memories_fallback: bool) -> str:
+def render_schema_migration(schema: Schema, add_memories_fallback: bool) -> str:
     ordered = order_tables(schema.tables)
     blocks = [render_table(t) for t in ordered]
     if add_memories_fallback:
@@ -145,11 +148,14 @@ def generate(xlsx_path: Path) -> dict[str, str]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--xlsx", type=Path, default=None,
+        "--xlsx",
+        type=Path,
+        default=None,
         help="Path to THEA DB.xlsx (defaults to THEA_SCHEMA_XLSX env var, or ../THEA DB.xlsx)",
     )
     parser.add_argument(
-        "--check", action="store_true",
+        "--check",
+        action="store_true",
         help="Print output without writing files; exit 1 if it would change anything",
     )
     args = parser.parse_args()

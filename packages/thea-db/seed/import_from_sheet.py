@@ -5,18 +5,20 @@ This file is gitignored on purpose (see seed/README.md) -- the sheet
 contains real personal data, not fixtures. Re-run this locally whenever
 you want fresh seed data; nothing here should ever be committed.
 """
+
 from __future__ import annotations
 
 import argparse
 from datetime import date, datetime
 from pathlib import Path
+from typing import Any
 
-from app.schema_reader import load_registry, read_table_rows, require_xlsx_path
+from thea_db.schema_reader import load_registry, read_table_rows, require_xlsx_path
 
 SEED_FILE = Path(__file__).parent / "local_seed.sql"
 
 
-def sql_literal(value) -> str:
+def sql_literal(value: Any) -> str:
     if value is None or value == "":
         return "NULL"
     if isinstance(value, bool):
@@ -31,7 +33,7 @@ def sql_literal(value) -> str:
     return f"'{text}'"
 
 
-def render_insert(schema_name: str, table_name: str, rows: list[dict]) -> str | None:
+def render_insert(schema_name: str, table_name: str, rows: list[dict[str, Any]]) -> str | None:
     if not rows:
         return None
     columns = [c for c in rows[0].keys() if c is not None]

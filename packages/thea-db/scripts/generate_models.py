@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """Regenerates app/models/*.py from THEA DB.xlsx. Do not hand-edit the output."""
+
 from __future__ import annotations
 
 import argparse
 import re
 from pathlib import Path
 
-from app.schema_reader import TYPE_MAP, TYPE_OVERRIDES, Column, Table, load_registry, require_xlsx_path
+from thea_db.schema_reader import TYPE_MAP, TYPE_OVERRIDES, Column, Table, load_registry, require_xlsx_path
 
-MODELS_DIR = Path(__file__).parent / "app" / "models"
+MODELS_DIR = Path(__file__).resolve().parents[1] / "src" / "thea_db" / "models"
 
 HEADER_COMMENT = (
-    "# Auto-generated from THEA DB.xlsx via app/schema_reader.py."
-    " Do not hand-edit; re-run generate_models.py."
+    "# Auto-generated from THEA DB.xlsx via app/schema_reader.py. Do not hand-edit; re-run generate_models.py."
 )
 
 SQLALCHEMY_TYPE_MAP = {
@@ -71,7 +71,7 @@ def sqlalchemy_type(table_name: str, column: Column) -> tuple[str, set[str]]:
 
 def render_column(table: Table, column: Column) -> tuple[str, set[str]]:
     if column.name == "id":
-        return '    id = Column(Integer, primary_key=True)', {"from sqlalchemy import Column, Integer"}
+        return "    id = Column(Integer, primary_key=True)", {"from sqlalchemy import Column, Integer"}
     py_type, imports = sqlalchemy_type(table.name, column)
     imports.add("from sqlalchemy import Column")
     args = [py_type]
@@ -83,7 +83,7 @@ def render_column(table: Table, column: Column) -> tuple[str, set[str]]:
 def render_table_class(table: Table) -> tuple[str, set[str]]:
     imports: set[str] = {"from sqlalchemy import Column"}
     lines = [
-        f'class {python_class_name(table.name)}(Base):',
+        f"class {python_class_name(table.name)}(Base):",
         f'    __tablename__ = "{table.name}"',
         f'    __table_args__ = {{"schema": "{table.schema.name}"}}',
         "",
@@ -101,7 +101,7 @@ def render_module(
     extra_imports: set[str] | None = None,
     extra_classes: list[str] | None = None,
 ) -> str:
-    all_imports: set[str] = {"from app.models.base import Base"} | (extra_imports or set())
+    all_imports: set[str] = {"from thea_db.models.base import Base"} | (extra_imports or set())
     class_blocks: list[str] = []
     for table in tables:
         block, imports = render_table_class(table)
@@ -109,8 +109,8 @@ def render_module(
         all_imports |= imports
     class_blocks.extend(extra_classes or [])
 
-    first_party = sorted(i for i in all_imports if i.startswith("from app."))
-    third_party = sorted(i for i in all_imports if not i.startswith("from app."))
+    first_party = sorted(i for i in all_imports if i.startswith("from thea_db."))
+    third_party = sorted(i for i in all_imports if not i.startswith("from thea_db."))
 
     sqlalchemy_imports = [i for i in third_party if i.startswith("from sqlalchemy import")]
     other_third_party = sorted(i for i in third_party if not i.startswith("from sqlalchemy import"))
@@ -135,7 +135,7 @@ class Base(DeclarativeBase):
 
 # thea.memories isn't in the live sheet yet (see README.md "Known open items" #1) —
 # mirrors the hardcoded fallback in generate_migrations.py.
-MEMORIES_FALLBACK_CLASS = '''class Memories(Base):
+MEMORIES_FALLBACK_CLASS = """class Memories(Base):
     __tablename__ = "memories"
     __table_args__ = {"schema": "thea"}
 
@@ -148,7 +148,7 @@ MEMORIES_FALLBACK_CLASS = '''class Memories(Base):
     related_id = Column(Integer)
     salience = Column(Integer)
     notes = Column(Text)
-    created_at = Column(DateTime(timezone=True))'''
+    created_at = Column(DateTime(timezone=True))"""
 
 
 def generate(xlsx_path: Path) -> dict[str, str]:
@@ -181,7 +181,7 @@ def main() -> None:
             old.unlink()
     for name, content in files.items():
         (MODELS_DIR / name).write_text(content, encoding="utf-8", newline="\n")
-        print(f"wrote app/models/{name}")
+        print(f"wrote src/thea_db/models/{name}")
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 
 from sqlalchemy import Boolean, Column, DateTime, Integer, Text
 
-from app.models.base import Base
+from thea_db.models.base import Base
 
 
 class SchemaRegistry(Base):

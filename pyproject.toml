@@ -1,9 +1,57 @@
+# Root of the uv workspace. "Virtual" -- the root itself is not a package;
+# every installable unit lives under services/ or packages/.
 [tool.uv.workspace]
-members = ["brain", "heart", "muscles", "senses"]
+members = ["services/*", "packages/*"]
+
+[dependency-groups]
+dev = [
+  "ruff>=0.9",
+  "mypy>=1.13",
+  "pytest>=8.3",
+  "pytest-asyncio>=0.24",
+  "httpx>=0.27",
+  "pre-commit>=4.0",
+]
+
+[tool.uv]
+default-groups = ["dev"]
 
 [tool.ruff]
 line-length = 120
-target-version = "py311"
+target-version = "py312"
+extend-exclude = ["apps", "packages/thea-db/src/thea_db/models"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I"]
+select = ["E", "F", "I", "B", "UP", "ASYNC", "S"]
+ignore = ["S101"]  # assert is fine in tests
+
+
+[tool.ruff.lint.per-file-ignores]
+# Generated from THEA DB.xlsx -- don't fight the generator's formatting.
+"packages/thea-db/src/thea_db/models/*.py" = ["E501", "UP"]
+# These scripts emit SQL from the local schema sheet by design (offline, trusted input).
+"packages/thea-db/{scripts,seed}/*.py" = ["S608"]
+"**/tests/**" = ["S105", "S106"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["thea_agent", "thea_voice", "thea_vision", "thea_home", "thea_db", "thea_contracts"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+mypy_path = [
+  "services/agent/src", "services/voice/src", "services/vision/src",
+  "services/home/src", "packages/thea-db/src", "packages/thea-contracts/src",
+]
+explicit_package_bases = true
+# Generated SQLAlchemy models use classic Column() declarations.
+[[tool.mypy.overrides]]
+module = ["thea_db.models.*"]
+ignore_errors = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["services", "packages"]
+addopts = "--import-mode=importlib -p no:anyio"
+asyncio_default_fixture_loop_scope = "function"

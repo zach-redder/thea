@@ -4,7 +4,7 @@ from pgvector.sqlalchemy import Vector
 from sqlalchemy import ARRAY, Boolean, Column, Date, DateTime, Integer, Numeric, Text
 from sqlalchemy.dialects.postgresql import JSONB
 
-from app.models.base import Base
+from thea_db.models.base import Base
 
 
 class Profile(Base):
