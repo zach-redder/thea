@@ -53,3 +53,30 @@ def test_websocket_accepts_a_good_token() -> None:
         ws.send_json({"type": "auth", "token": TOKEN})
 
         assert ws.receive_json()["type"] == "error"  # authenticated; feature not built yet
+
+
+PLANNED_ROUTES = [
+    ("GET", "/api/v1/today", None),
+    ("GET", "/api/v1/stats/summary", None),
+    ("GET", "/api/v1/stats/series?area=sleep", None),
+    ("POST", "/api/v1/habits/list", {}),
+    ("POST", "/api/v1/habits/log", {"habit_id": 1}),
+    ("POST", "/api/v1/life/list", {}),
+    ("POST", "/api/v1/phone/context", {"place": "home", "movement": "arriving"}),
+    ("POST", "/api/v1/phone/share", {"kind": "link", "content": "https://example.com"}),
+    ("POST", "/api/v1/stop", None),
+]
+
+
+@pytest.mark.parametrize(("method", "path", "body"), PLANNED_ROUTES)
+def test_planned_routes_require_auth(method: str, path: str, body: dict[str, object] | None) -> None:
+    response = make_client(TOKEN).request(method, path, json=body)
+
+    assert response.status_code == 401
+
+
+@pytest.mark.parametrize(("method", "path", "body"), PLANNED_ROUTES)
+def test_planned_routes_exist_but_are_not_built(method: str, path: str, body: dict[str, object] | None) -> None:
+    response = make_client(TOKEN).request(method, path, json=body, headers={"Authorization": f"Bearer {TOKEN}"})
+
+    assert response.status_code in (501, 202)

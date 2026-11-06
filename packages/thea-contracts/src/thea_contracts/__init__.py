@@ -6,11 +6,12 @@ Timestamps are always UTC; JSON field names are snake_case.
 """
 
 from thea_contracts.commands import Command, DeviceCommand, SpeakCommand
-from thea_contracts.events import Trigger, TriggerSource, VisionEvent, VoiceUtterance
+from thea_contracts.events import PhoneContext, Trigger, TriggerSource, VisionEvent, VoiceUtterance
 
 __all__ = [
     "Command",
     "DeviceCommand",
+    "PhoneContext",
     "SpeakCommand",
     "Trigger",
     "TriggerSource",

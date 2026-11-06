@@ -46,3 +46,17 @@ class ListRequest(BaseModel):
 class ApprovalDecision(BaseModel):
     approval_id: str
     approved: bool
+
+
+class ShareRequest(BaseModel):
+    """Something the phone's share sheet sends to THEA ("remember this")."""
+
+    kind: Literal["link", "note", "text"]
+    content: str = Field(min_length=1)
+    title: str | None = None
+
+
+class HabitLogRequest(BaseModel):
+    habit_id: int
+    status: Literal["done", "skipped", "missed"] = "done"
+    notes: str | None = None

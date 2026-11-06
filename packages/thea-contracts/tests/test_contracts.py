@@ -21,3 +21,17 @@ def test_command_discriminator_picks_the_right_model() -> None:
 
 def test_timestamps_are_utc() -> None:
     assert SpeakCommand(text="hi").created_at.utcoffset() is not None
+
+
+def test_phone_context_is_a_trigger_and_rejects_bad_battery() -> None:
+    import pytest
+    from pydantic import ValidationError
+
+    from thea_contracts import PhoneContext
+
+    sent = PhoneContext(place="home", movement="arriving", battery_percent=80)
+    received: Trigger = TypeAdapter(Trigger).validate_json(sent.model_dump_json())
+
+    assert received == sent
+    with pytest.raises(ValidationError):
+        PhoneContext(battery_percent=150)
