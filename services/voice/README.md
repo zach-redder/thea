@@ -1,56 +1,30 @@
-# thea-senses
+# voice
 
-Always-on perception for thea — wake word, ambient audio, and vision. Runs continuously and locally, independent of whether a conversation is active.
+*Codename: senses (ears) + muscles (voice).* Everything THEA hears and says.
+Always on and local:
+- **Input:** VAD → wake word / ambient relevance → speech-to-text → speaker
+  ID → `VoiceUtterance` trigger to the agent.
+- **Output:** `SpeakCommand` → TTS → Snapcast, to the right room.
 
-## Overview
+It filters, it doesn't think: no LLM calls, no database, and raw audio never
+leaves memory.
 
-thea-senses is what makes thea feel present rather than purely reactive. It handles three input channels — explicit wake-word activation, filtered ambient audio (so thea can notice things said without being addressed directly), and vision events (motion/person detection escalating to scene analysis when warranted) — and publishes validated triggers to thea-heart.
-
-This repo deliberately does **not** talk to Claude, Postgres, or any external API for reasoning. It's a filter, not a thinker: cheap, continuous, always-on detection gating expensive processing, only escalating what actually clears the bar.
-
-## Role in the thea system
-
-thea-senses → thea-heart only, one direction. It has no other dependencies in the system:
-
-- Publishes trigger events (with transcript/classification, not raw audio) to thea-heart's webhook endpoints.
-- Does not persist raw audio or video beyond a short in-memory rolling buffer — nothing here writes to thea-brain directly.
-- Speaker diarization output feeds `config.privacy_mode` indirectly, via thea-heart, when an unfamiliar voice is detected.
-
-## Tech stack
-
-- **Python 3.11+**
-- **Porcupine** (Picovoice) — wake word detection
-- **Silero VAD** — the always-on gate before anything more expensive runs
-- **Whisper** (local, e.g. faster-whisper) — speech-to-text, only invoked when VAD triggers
-- **pyannote.audio** (or similar) — speaker diarization / guest detection
-- **A lightweight local vision model** (motion/person detection) gating a heavier vision-language pass only when flagged
-- **ReSpeaker USB mic array** — hardware target for multi-room capture
-
-## Planned structure
-
-```
-thea-senses/
-├── app/
-│   ├── main.py
-│   ├── audio/
-│   │   ├── wake_word.py
-│   │   ├── vad.py
-│   │   ├── stt.py
-│   │   ├── diarization.py
-│   │   └── relevance_filter.py    # directed-at-Zach? escalate or discard
-│   ├── vision/
-│   │   ├── motion_detector.py     # cheap always-on gate
-│   │   └── scene_analysis.py      # expensive pass, only on flag
-│   ├── publisher.py                # sends validated triggers to thea-heart
-│   └── buffer.py                   # short rolling buffer, nothing persisted
-├── models/                         # local model weights
-└── requirements.txt
+```bash
+uv run --package thea-voice uvicorn thea_voice.main:app --reload --port 8010
+uv sync --package thea-voice --extra models    # the heavy model stack, when you start building it
 ```
 
-## Status
+## Layout
 
-**Not yet implemented.** Lowest-priority to build first among the core-path repos — thea-heart can be developed and tested against manually-triggered/mocked input before real always-on perception exists. Build once thea-heart's context builder and intent router are working.
+```
+src/thea_voice/
+  main.py              /health, POST /api/v1/speak (auth'd)
+  pipeline.py          frame pipeline wiring (Pipecat-style)
+  buffer.py            in-memory rolling buffer
+  publisher.py         triggers -> agent
+  input/               vad, wake_word, stt, diarization, relevance_filter
+  output/              tts, snapcast
+models/                downloaded weights (gitignored)
+```
 
-## Related repos
-
-thea-heart (only direct dependency) · thea-brain · thea-muscles · thea-bones · thea-body
+**Status:** skeleton. Design: [docs/voice-pipeline.md](../../docs/voice-pipeline.md).
