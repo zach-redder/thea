@@ -1,22 +1,22 @@
-# Build context must be the repo root -- part of the shared uv workspace.
-#
-# senses doesn't serve HTTP (see README: "a filter, not a thinker" that
-# publishes to heart's webhooks), so there's no port to expose.
-#
-# NOTE: this image builds successfully (dependency install only), but the
-# container has nothing to run yet -- senses/app/main.py is still an empty
-# stub, and senses' own dependencies were never pinned upstream (see
-# senses/pyproject.toml). See docs/ARCHITECTURE.md for what's built vs planned.
-FROM python:3.11-slim
-RUN pip install --no-cache-dir uv==0.9.17
+# Build context: repo root (the uv workspace needs every member's pyproject).
+FROM python:3.12-slim
+
+COPY --from=ghcr.io/astral-sh/uv:0.9.17 /uv /uvx /bin/
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy PYTHONUNBUFFERED=1 TZ=UTC
+
+# Audio I/O for the (opt-in) model stack.
+RUN apt-get update && apt-get install -y --no-install-recommends libportaudio2 && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /repo
 COPY pyproject.toml uv.lock ./
-COPY brain ./brain
-COPY heart ./heart
-COPY muscles ./muscles
-COPY senses ./senses
-RUN uv sync --frozen --package senses
+COPY packages ./packages
+COPY services ./services
+RUN uv sync --frozen --no-dev --package thea-voice
 
-WORKDIR /repo/senses
-CMD ["uv", "run", "--project", "/repo", "--package", "senses", "python", "app/main.py"]
+RUN useradd --create-home --uid 1000 thea && chown -R thea /repo
+USER thea
+ENV PATH="/repo/.venv/bin:$PATH"
+
+EXPOSE 8010
+HEALTHCHECK --interval=15s --timeout=3s --retries=5   CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8010/health')"
+CMD ["uvicorn", "thea_voice.main:app", "--host", "0.0.0.0", "--port", "8010"]

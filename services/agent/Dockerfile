@@ -1,20 +1,19 @@
-# Build context must be the repo root -- heart depends on brain via the uv workspace.
-#
-# NOTE: this image builds successfully (dependency install only), but the
-# container will not actually serve anything yet -- heart/app/main.py is
-# still an empty stub with no `app` object for uvicorn to run. See
-# docs/ARCHITECTURE.md for what's built vs planned.
-FROM python:3.11-slim
-RUN pip install --no-cache-dir uv==0.9.17
+# Build context: repo root (the uv workspace needs every member's pyproject).
+FROM python:3.12-slim
+
+COPY --from=ghcr.io/astral-sh/uv:0.9.17 /uv /uvx /bin/
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy PYTHONUNBUFFERED=1 TZ=UTC
 
 WORKDIR /repo
 COPY pyproject.toml uv.lock ./
-COPY brain ./brain
-COPY heart ./heart
-COPY muscles ./muscles
-COPY senses ./senses
-RUN uv sync --frozen --package heart
+COPY packages ./packages
+COPY services ./services
+RUN uv sync --frozen --no-dev --package thea-agent
 
-WORKDIR /repo/heart
+RUN useradd --create-home --uid 1000 thea && chown -R thea /repo
+USER thea
+ENV PATH="/repo/.venv/bin:$PATH"
+
 EXPOSE 8000
-CMD ["uv", "run", "--project", "/repo", "--package", "heart", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+HEALTHCHECK --interval=15s --timeout=3s --retries=5   CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+CMD ["uvicorn", "thea_agent.main:app", "--host", "0.0.0.0", "--port", "8000"]

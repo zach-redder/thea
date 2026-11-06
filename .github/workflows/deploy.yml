@@ -8,11 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Not yet implemented
+      - name: Not configured yet
         run: |
-          echo "No deploy target is configured yet."
-          echo "Per docs/archive/thea-bones-original-README.md, the target is"
-          echo "a Beelink SER7 or Intel NUC 13 Pro running the same docker-compose"
-          echo "setup as local dev. Wire this job up (SSH + docker compose pull/up,"
-          echo "or a self-hosted runner) once that box exists."
+          echo "No deploy target exists yet. See infra/deploy/README.md: the plan is a"
+          echo "home server (Beelink SER7 / Intel NUC 13 Pro) running docker compose,"
+          echo "reached over Tailscale, deployed via a self-hosted runner or SSH."
           exit 1

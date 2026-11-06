@@ -1,9 +1,8 @@
-# Build context: ./brain
+# Build context: packages/thea-db
 #
-# brain is not a long-running service (heart connects to Postgres directly
-# via SQLAlchemy -- see brain/README.md). This image only exists to apply
-# brain/migrations/*.sql against Postgres as docker-compose's one-shot
-# `migrate` service; it's a thin psql wrapper, not a Python runtime.
+# One-shot job for the `migrate` compose service: applies migrations/*.sql in
+# order with psql. thea-db is a library the agent imports, not a long-running
+# service, so this is the only image it needs.
 FROM postgres:16-alpine
 COPY migrations /migrations
 CMD ["sh", "-c", "for f in /migrations/*.sql; do echo \"applying $f\"; psql \"$DATABASE_URL\" -v ON_ERROR_STOP=1 -f \"$f\" || exit 1; done"]
