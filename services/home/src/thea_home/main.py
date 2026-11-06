@@ -3,9 +3,10 @@
 from importlib.metadata import version
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 
 from thea_contracts import DeviceCommand
+from thea_home.security import require_token
 
 SERVICE = "thea-home"
 PORT = 8030
@@ -18,7 +19,7 @@ def create_app() -> FastAPI:
     async def health() -> dict[str, str]:
         return {"status": "ok", "service": SERVICE, "version": version(SERVICE)}
 
-    @app.post("/api/v1/commands", status_code=501)
+    @app.post("/api/v1/commands", status_code=501, dependencies=[Depends(require_token)])
     async def execute(command: DeviceCommand) -> dict[str, str]:
         """Carry out a device command and report success/failure only."""
         return {"detail": "device control is not implemented yet"}

@@ -53,3 +53,6 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# Local browser-QA artifacts
+.playwright-mcp/

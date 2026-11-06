@@ -3,9 +3,10 @@
 from importlib.metadata import version
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 
 from thea_contracts import SpeakCommand
+from thea_voice.security import require_token
 
 SERVICE = "thea-voice"
 PORT = 8010
@@ -18,7 +19,7 @@ def create_app() -> FastAPI:
     async def health() -> dict[str, str]:
         return {"status": "ok", "service": SERVICE, "version": version(SERVICE)}
 
-    @app.post("/api/v1/speak", status_code=501)
+    @app.post("/api/v1/speak", status_code=501, dependencies=[Depends(require_token)])
     async def speak(command: SpeakCommand) -> dict[str, str]:
         """Synthesize and play speech in the requested rooms. See docs/voice-pipeline.md."""
         return {"detail": "speech output is not implemented yet"}
