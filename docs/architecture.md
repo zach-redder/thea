@@ -22,6 +22,7 @@ flowchart LR
     claude[Claude API]
     voyage[Voyage AI<br/>embeddings]
     mcp[MCP servers<br/>Notion · Calendar · Spotify]
+    accounts[Account APIs<br/>GitHub · Twitch · social · health]
     bridge[Desktop bridge<br/>local MCP server]
 
     web & phone -->|REST + WebSocket| agent
@@ -35,6 +36,7 @@ flowchart LR
     agent --> claude
     agent --> voyage
     agent --> mcp
+    agent <--> accounts
     agent -.->|MCP, while desktop is connected| bridge
     desktop --- bridge
 ```
@@ -88,6 +90,8 @@ thea_agent/
 ├── llm/               the Claude client (the only one in the repo)
 ├── tools/             registry, MCP connections, native tools, desktop tools
 ├── memory/            retrieval, post-turn extraction, embedding writer
+├── integrations/      Integration ABC + adapters: calendar, GitHub, Twitch, social, Spotify, health
+├── stats/             collectors + aggregators behind the dashboard and the get_stats tool
 └── scheduler/         proactive jobs: morning brief, stale-data check, daily synthesis
 ```
 
@@ -136,3 +140,18 @@ See [reference/hermes-agent.md](reference/hermes-agent.md).
 | Desktop | Tauri 2 |
 | Run / deploy | Docker Compose; a home server (Beelink SER7 / NUC 13 Pro); Tailscale for remote access |
 | CI | GitHub Actions |
+
+## Design docs by capability
+
+This page is the system map. The detail lives next to the capability:
+
+| Capability | Doc |
+|---|---|
+| What she's for, and every requirement | [vision.md](vision.md) |
+| How she sounds | [persona.md](persona.md) |
+| How she remembers (Redis + Postgres) | [memory.md](memory.md) |
+| How she decides, how fast, how much autonomy | [agent-runtime.md](agent-runtime.md) |
+| Mics, wake word, "is he talking to me?", cameras, home control | [ambient-and-home.md](ambient-and-home.md) |
+| Accounts and phone | [integrations.md](integrations.md) |
+| Stats, habits and the dashboard | [stats-and-dashboard.md](stats-and-dashboard.md) |
+| What to build, in order | [implementation-plan.md](implementation-plan.md) |

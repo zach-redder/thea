@@ -18,12 +18,14 @@ Open http://localhost:8000/docs. Every `/api/v1/*` route needs
 src/thea_agent/
   main.py         app factory
   core/           settings (secrets only), UTC logging, bearer auth
-  api/v1/         chat, sessions, memory, approvals, triggers, realtime WebSocket
+  api/v1/         chat, sessions, memory, approvals, triggers, phone, stats, control, realtime WebSocket
   channels/       Channel ABC + web / phone / voice / desktop adapters
   runtime/        turn loop, context builder, prompt loader, intent router, output dispatch
   llm/            Claude client (the only LLM caller in the repo)
   tools/          registry, MCP connections, native tools, desktop tools
   memory/         retrieval, extraction, writer (Voyage embeddings)
+  integrations/   Integration ABC + calendar, GitHub, Twitch, social, Spotify, health
+  stats/          collectors and aggregators for the dashboard and get_stats
   scheduler/      proactive jobs (morning brief, stale data, daily synthesis)
 tests/
 ```

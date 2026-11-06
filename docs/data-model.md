@@ -140,6 +140,36 @@ Rooms, devices, items, collections
 | `environment.locations` | Frequented places including coffee shops, gym, work and favourite spots | `id`, `name`, `category`, `address`, `neighborhood`, `city`, `visit_frequency`, `favorite`, `notes`, `embedding`, `updated_at` |
 | `environment.vehicles` | Car info, service history, oil changes, tire rotations and upcoming maintenance | `id`, `make`, `model`, `year`, `vin`, `license_plate`, `mileage`, `last_oil_change`, `last_tire_rotation`, `next_service_due`, `insurance_provider`, `insurance_policy`, `notes`, `updated_at` |
 
+## Planned schema additions
+
+The [vision](vision.md) needs tables that aren't in `THEA DB.xlsx` yet. Add
+them as rows in the registry tabs (`table_registry`, `column_registry`) plus a
+data tab per table, then run `just gen-schema`. The workbook holds personal
+data, so Zach edits it (or explicitly asks for it to be edited). These are the
+proposed columns, in generator types.
+
+| Table | Needed by | Columns |
+|---|---|---|
+| `thea.memories` (move into registry) | Phase 1 | existing columns, plus `status` TEXT (`active`/`superseded`), `superseded_by` INTEGER, `last_recalled_at` TIMESTAMPTZ |
+| `thea.conversations` | Phase 1 | `id`, `channel` TEXT, `started_at` TIMESTAMPTZ, `ended_at` TIMESTAMPTZ, `summary` TEXT, `room` TEXT |
+| `thea.messages` | Phase 1 | `id`, `conversation_id` (references thea.conversations.id), `role` TEXT, `content` TEXT, `tokens_in` INTEGER, `tokens_out` INTEGER, `model` TEXT, `latency_ms` INTEGER, `created_at` TIMESTAMPTZ |
+| `thea.tool_calls` | Phase 1 / 3 | `id`, `conversation_id`, `tool_id` (references thea.tools.id), `arguments` JSONB, `result` JSONB, `status` TEXT (`pending`/`approved`/`denied`/`done`/`error`), `approved_by` TEXT, `created_at` TIMESTAMPTZ |
+| `thea.integration_credentials` | Phase 3 | `id`, `integration_id` (references thea.integrations.id), `encrypted_token` TEXT, `expires_at` TIMESTAMPTZ, `scopes` TEXT[], `updated_at` TIMESTAMPTZ ([ADR 0009](decisions/0009-integration-credentials.md)) |
+| `thea.tools` + `autonomy` | Phase 8 | add `autonomy` INTEGER (0-4, see [agent-runtime.md](agent-runtime.md#autonomy-levels)) |
+| `thea.preferences` | Phase 8 | `id`, `key` TEXT, `value` JSONB, `context` TEXT, `source` TEXT, `updated_at` TIMESTAMPTZ (learned addressee thresholds, per-context behavior) |
+| `identity.habit_logs` | Phase 4 | `id`, `routine_id` (references identity.routines.id), `logged_at` TIMESTAMPTZ, `status` TEXT (`done`/`skipped`/`missed`), `notes` TEXT |
+| `stats` schema + `stats.metrics` | Phase 4 | `id`, `area` TEXT (sleep, steps, commits, ...), `name` TEXT, `value` NUMERIC, `unit` TEXT, `occurred_at` TIMESTAMPTZ, `source` TEXT |
+
+Notes for whoever adds these:
+- Follow the existing conventions: INTEGER identity keys, `TIMESTAMPTZ`,
+  `TEXT` (not VARCHAR), snake_case, `(references schema.table.id)` markers for
+  foreign keys.
+- `identity.routines` already models habits ("daily routines and habits with
+  triggers and steps"). `habit_logs` adds the missing history; don't create a
+  parallel `habits` table.
+- A new `stats` schema also needs a `schema_registry` row.
+- Embedding columns stay `vector(1536)`.
+
 ## Known schema issues
 
 These are tracked here rather than silently fixed:

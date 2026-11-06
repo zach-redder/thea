@@ -75,11 +75,27 @@ through the house speakers.
 Pending approvals are pushed over the WebSocket, and appear as a push
 notification on the phone once that's built.
 
+### Phone, stats and control
+
+| Method | Path | Body / query | Purpose |
+|---|---|---|---|
+| POST | `/api/v1/phone/context` | `PhoneContext` (place, movement, battery, focus mode, now playing) | The phone pushes context on events (arriving home, focus changed) |
+| POST | `/api/v1/phone/share` | `{kind, content, title?}` | Share sheet -> "remember this" |
+| GET | `/api/v1/today` | — | Agenda, habits due, overnight changes, THEA's one-liner |
+| GET | `/api/v1/stats/summary` | `?range=7d` | Headline numbers across every area |
+| GET | `/api/v1/stats/series` | `?area=sleep&range=30d` | One area as a time series |
+| POST | `/api/v1/habits/list` | `{search?, offset, limit}` | Habits with streaks and today's status |
+| POST | `/api/v1/habits/log` | `{habit_id, status, notes?}` | Check a habit on or off |
+| POST | `/api/v1/life/list` | `{search?, offset, limit}` | The life-log timeline |
+| POST | `/api/v1/stop` | — | Emergency stop: cancel in-flight turns and queued actions |
+
+Design: [stats-and-dashboard.md](stats-and-dashboard.md), [integrations.md](integrations.md#phone).
+
 ### Service-to-service
 
 | Method | Path | Called by | Body |
 |---|---|---|---|
-| POST | `/api/v1/triggers` (agent) | voice, vision | `VoiceUtterance` or `VisionEvent` |
+| POST | `/api/v1/triggers` (agent) | voice, vision | `VoiceUtterance`, `VisionEvent` or `PhoneContext` |
 | POST | `/api/v1/speak` (voice, :8010) | agent | `SpeakCommand` |
 | POST | `/api/v1/commands` (home, :8030) | agent | `DeviceCommand` |
 

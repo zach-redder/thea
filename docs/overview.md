@@ -20,8 +20,8 @@ JARVIS than to a chatbot you open in an app.
   synthesis of where your life is at. All of it respects do-not-disturb and
   privacy mode.
 
-THEA grew out of the Keystone app ecosystem into a standalone assistant with
-her own architecture.
+The full product definition (requirements, capability map and the scenes the finished system should handle)
+is [vision.md](vision.md). The persona brief is [persona.md](persona.md).
 
 ## Personality
 
@@ -64,7 +64,7 @@ Why the names changed: [decisions/0002-descriptive-names.md](decisions/0002-desc
 
 ## Status
 
-Early scaffolding. What's real today:
+Early scaffolding. The plan for the rest is [implementation-plan.md](implementation-plan.md). What's real today:
 - the database schema (generated from `THEA DB.xlsx`)
 - runnable service skeletons with health checks, auth and tests
 - the web app shell (talk screen with the orb, dashboard pages, installable on a phone)

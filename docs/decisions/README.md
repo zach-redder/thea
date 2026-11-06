@@ -14,3 +14,5 @@ next number, and never rewrite an accepted ADR; supersede it with a new one.
 | [0006](0006-tauri-desktop.md) | Tauri 2 for the desktop app; a local MCP bridge for PC control |
 | [0007](0007-tailscale-remote-access.md) | Tailscale for remote access; nothing on the public internet |
 | [0008](0008-env-for-secrets-only.md) | `.env` holds secrets only; behavior lives in `thea.config` |
+| [0009](0009-integration-credentials.md) | OAuth tokens live in an encrypted DB store, not `.env` |
+| [0010](0010-model-routing-and-latency.md) | Tiered model routing for fast, smart responses |

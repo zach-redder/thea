@@ -69,3 +69,18 @@ can act on all of them. Treat her like a password manager with arms.
 Claude, Voyage AI and ElevenLabs receive the text needed for a turn. Keep
 that minimal: retrieve only the memories relevant to the turn, and never send
 whole tables. Plaid balances are fetched live and not persisted.
+
+## Account access and autonomy
+
+THEA will hold read access, and sometimes write access, to GitHub, calendar, social and other accounts.
+The controls are layered: narrow provider scopes, per-tool autonomy levels, confirmation for anything
+outward-facing, draft-first writes, prompt-injection hygiene, and an audit log of every tool call.
+See [integrations.md](integrations.md#safety-model-for-account-access) and
+[agent-runtime.md](agent-runtime.md#autonomy-levels). OAuth tokens are stored encrypted
+([ADR 0009](decisions/0009-integration-credentials.md)).
+
+## Ambient listening
+
+Always-on mics and cameras are the most sensitive part of the system. Defaults: no audio or video
+stored; calls, meetings and guests not captured; an obvious "listening" indicator; one-phrase and
+physical mute; cameras off in private rooms. See [ambient-and-home.md](ambient-and-home.md).

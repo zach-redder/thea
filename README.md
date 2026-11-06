@@ -43,7 +43,10 @@ docs/               start at docs/README.md
 
 ## Docs
 
+- [Vision](docs/vision.md): what she's meant to become: requirements, capability map, scenes
+- [Implementation plan](docs/implementation-plan.md): phased build plan for future sessions
 - [Overview](docs/overview.md): what THEA is, principles, codenames
+- [Persona](docs/persona.md): how she should sound
 - [Architecture](docs/architecture.md): system map, boundaries, stack
 - [API](docs/api.md): endpoints for web, phone, desktop and Shortcuts
 - [Data model](docs/data-model.md): schemas, and how they're generated from the workbook

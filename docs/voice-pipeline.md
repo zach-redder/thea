@@ -87,3 +87,9 @@ processors. Adopting Pipecat itself for the pipeline (it has Silero, Whisper
 and ElevenLabs integrations and a FastAPI WebSocket transport) is the
 recommended first step when building this service. See
 [ADR 0005](decisions/0005-voice-stack.md).
+
+## See also
+
+- [ambient-and-home.md](ambient-and-home.md): how she decides a sentence was meant for her, and what she does with it.
+- [persona.md](persona.md#voice-spoken-specifics): writing for the ear and choosing the voice.
+- [agent-runtime.md](agent-runtime.md#model-routing-the-speedintelligence-trade): the model tiers that keep spoken replies fast.
