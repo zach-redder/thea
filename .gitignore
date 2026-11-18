@@ -1,17 +1,58 @@
+# ---------------------------------------------------------------------------
+# Personal data -- NEVER commit.
+# THEA DB.xlsx is the schema source of truth AND holds real personal data; it
+# lives beside this repo, not in it. The seed importer writes its rows to
+# local_seed.sql, which is just as sensitive.
+# ---------------------------------------------------------------------------
+*.xlsx
+**/seed/local_seed.sql
+**/seed/*.local.sql
+
+# Secrets
 .env
+.env.*
+!.env.example
 *.local.yml
 
 # Python / uv
 .venv/
 __pycache__/
-*.pyc
+*.py[cod]
+.pytest_cache/
 .ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
 
-# Node / Next.js
+# Node / Next.js / pnpm
 node_modules/
 .next/
+out/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+npm-debug.log*
+pnpm-debug.log*
 
-# thea-brain schema source + generated local seed data (see brain/seed/README.md)
-brain/seed/local_seed.sql
-*.xlsx
-THEA DB.xlsx
+# Tauri / Rust
+apps/desktop/src-tauri/target/
+apps/desktop/src-tauri/gen/
+
+# Local model weights (downloaded, large)
+services/voice/models/*
+!services/voice/models/.gitkeep
+services/vision/models/*
+!services/vision/models/.gitkeep
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Local browser-QA artifacts
+.playwright-mcp/

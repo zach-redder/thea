@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Minimal permissions for the main window. Widen deliberately, one capability at a time.",
+  "windows": ["main"],
+  "permissions": ["core:default", "global-shortcut:allow-register"]
+}

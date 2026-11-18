@@ -1,25 +1,13 @@
-# Laptop-dev overrides, auto-merged by `docker compose up` when present
-# alongside docker-compose.yml (per thea-bones' original design intent --
-# see docs/archive/thea-bones-original-README.md). Bind-mounts source so
-# edits take effect without a rebuild, once there's real code to edit.
+# Dev overrides, auto-merged by `docker compose up`: bind-mount source and hot-reload.
 services:
-  heart:
+  agent:
     volumes:
-      - ./heart/app:/repo/heart/app
-    command: ["uv", "run", "--project", "/repo", "--package", "heart", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+      - ./services/agent/src:/repo/services/agent/src
+      - ./packages:/repo/packages
+    command: ["uvicorn", "thea_agent.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
-  muscles:
+  home:
     volumes:
-      - ./muscles/app:/repo/muscles/app
-    command: ["uv", "run", "--project", "/repo", "--package", "muscles", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
-
-  senses:
-    volumes:
-      - ./senses/app:/repo/senses/app
-      - ./senses/models:/repo/senses/models
-
-  body:
-    volumes:
-      - ./body:/app
-      - /app/node_modules
-      - /app/.next
+      - ./services/home/src:/repo/services/home/src
+      - ./packages/thea-contracts:/repo/packages/thea-contracts
+    command: ["uvicorn", "thea_home.main:app", "--host", "0.0.0.0", "--port", "8030", "--reload"]

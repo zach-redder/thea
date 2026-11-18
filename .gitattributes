@@ -1,0 +1,8 @@
+# LF everywhere in the repo, regardless of the OS that checked it out.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary
+*.xlsx binary
+*.onnx binary
+*.ppn binary

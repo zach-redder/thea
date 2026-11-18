@@ -1,49 +1,54 @@
 # THEA
 
-THEA is a persistent, personal AI assistant with the long-term goal of
-ambient, home-wide presence — closer to JARVIS than to a chatbot confined
-to one app. She's organized into six systems named after body parts
-(`brain`, `heart`, `senses`, `muscles`, `body`, plus `bones` as the
-connective infrastructure); see [`docs/THEA.md`](docs/THEA.md) for what
-she is and [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for how she's
-built.
+A personal AI assistant: a persistent presence that knows you, remembers, and
+acts. She lives on a home server and reaches you through room speakers, a web
+dashboard, an app on your phone, and your desktop. Closer to JARVIS than to a
+chatbot.
 
-**Status**: early scaffolding. `brain`'s Postgres/pgvector schema is the
-one system with real, working code today; everything else is designed in
-detail but not yet implemented. Don't expect a working assistant yet —
-expect a monorepo skeleton with one real data layer and five detailed
-blueprints.
+**Status:** foundation. The schema, service skeletons, auth, CI and the web
+shell are real. The agent loop, voice, home control and desktop bridge are
+designed but not built. See [docs/roadmap.md](docs/roadmap.md).
 
 ## Quickstart
 
-```
-docker compose up
-```
-
-Postgres, Redis, and the one-shot schema migration will come up healthy.
-`heart`, `muscles`, `senses`, and `body` will build but won't stay running
-yet — their application code doesn't exist. See
-[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md#local-dev-what-docker-compose-up-actually-does-today)
-for exactly what that means.
-
-For Python work outside Docker: [`uv`](https://docs.astral.sh/uv/) manages
-`brain`, `heart`, `muscles`, and `senses` as one workspace —
-`uv sync --all-extras` from the repo root.
-
-## Structure
-
-```
-thea/
-├── brain/      Postgres + pgvector schema, migrations, data layer
-├── heart/      Core orchestration -- context, Claude API, tool routing
-├── senses/     Always-on perception -- wake word, ambient audio, vision
-├── muscles/    Actuation -- Home Assistant, MQTT, multi-room audio
-├── body/       Read-only dashboard (Next.js)
-├── docs/       THEA.md, ARCHITECTURE.md
-└── docker-compose.yml
+```bash
+cp .env.example .env     # set THEA_API_TOKEN (and ANTHROPIC_API_KEY when Phase 1 lands)
+just setup               # uv sync + pnpm install
+just db                  # Postgres (pgvector) + Redis + migrations, in Docker
+just agent               # API   -> http://localhost:8000/docs
+just web                 # UI    -> http://localhost:3000
 ```
 
-## Learn more
+Everything in Docker instead: `docker compose up --build`. Without `just`,
+every recipe in the `justfile` is a plain `uv` / `pnpm` / `docker` command.
+Full guide: [docs/development.md](docs/development.md).
 
-- [`docs/THEA.md`](docs/THEA.md) — what THEA is, the anatomical metaphor, design intent
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — tech stack, data flow, what's built vs. planned
+## Layout
+
+```
+apps/
+  web/              Next.js PWA: talk screen, memory, logs, health (also the phone app)
+  desktop/          Tauri 2 desktop app + desktop bridge (scaffold)
+services/
+  agent/            the brain: agent loop, Claude, tools, memory, scheduler, and the API every client uses
+  voice/            wake word, speech-to-text, speaker ID, text-to-speech, multi-room output
+  vision/           camera motion gate -> scene analysis
+  home/             Home Assistant / MQTT device control
+packages/
+  thea-db/          Postgres + pgvector schema (generated from THEA DB.xlsx), models, repositories
+  thea-contracts/   message models shared between services
+infra/              migrate image, deploy notes
+docs/               start at docs/README.md
+```
+
+## Docs
+
+- [Vision](docs/vision.md): what she's meant to become: requirements, capability map, scenes
+- [Implementation plan](docs/implementation-plan.md): phased build plan for future sessions
+- [Overview](docs/overview.md): what THEA is, principles, codenames
+- [Persona](docs/persona.md): how she should sound
+- [Architecture](docs/architecture.md): system map, boundaries, stack
+- [API](docs/api.md): endpoints for web, phone, desktop and Shortcuts
+- [Data model](docs/data-model.md): schemas, and how they're generated from the workbook
+- [Roadmap](docs/roadmap.md): what to build next
+- [AGENTS.md](AGENTS.md): rules for AI coding assistants working in this repo

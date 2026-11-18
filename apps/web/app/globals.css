@@ -1,0 +1,61 @@
+@import 'tailwindcss';
+
+/* THEA design tokens. Dark-first: she's meant to sit on a wall tablet or a
+   phone at night as comfortably as on a desktop. */
+@theme {
+  --color-ink: #0d0f12;
+  --color-panel: #161a20;
+  --color-line: #262c35;
+  --color-text: #e8e4dc;
+  --color-muted: #8b919a;
+  --color-ember: #ff8a3d; /* THEA's accent: warm, not neon */
+  --color-tide: #4fd1c5; /* listening / healthy */
+  --color-alert: #ff5d5d;
+
+  --font-sans: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  --radius-card: 1.25rem;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-ink);
+  color: var(--color-text);
+}
+
+/* The orb's idle "breathing". Disabled for people who prefer reduced motion. */
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+@keyframes ripple {
+  from {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  to {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -1,14 +1,23 @@
 .git
-.venv
-__pycache__
-*.pyc
-.ruff_cache
-node_modules
-.next
+**/.venv
+**/__pycache__
+**/*.pyc
+**/.ruff_cache
+**/.mypy_cache
+**/.pytest_cache
+**/node_modules
+**/.next
+apps/desktop/src-tauri/target
 docs
+.playwright-mcp
 
-# Never let a stray copy of the personal schema/data source end up in an image layer.
-*.xlsx
-brain/seed/local_seed.sql
-.env
-*/.env
+# Never let the personal schema/data source or secrets end up in an image layer.
+**/*.xlsx
+**/seed/local_seed.sql
+**/.env
+**/.env.*
+!**/.env.example
+
+# Downloaded model weights are mounted at runtime, not baked in.
+services/voice/models
+services/vision/models

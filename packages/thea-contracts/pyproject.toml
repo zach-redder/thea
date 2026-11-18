@@ -1,0 +1,15 @@
+[project]
+name = "thea-contracts"
+version = "0.1.0"
+description = "Shared event and command models passed between THEA services."
+requires-python = ">=3.12"
+dependencies = [
+  "pydantic>=2.9",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/thea_contracts"]
